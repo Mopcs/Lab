@@ -1,36 +1,39 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace ConsoleApp48
+﻿namespace ConsoleApp49
 {
     internal class Program
     {
         static void Main()
         {
-            Console.WriteLine("Поиск решений уравнения на интервале [-5, 5]");
+            Console.WriteLine("Поиск решений уравнения на интервале [-5, 5]:");
 
-            double start = -5;
-            double end = 5;
-            double step = 0.1;
+            double intervalStart = -5;
+            double intervalEnd = 5;
+            double step = 0.001;
             double tolerance = 0.001;
+            
 
-            double currentIntervalStart = start;
-            double currentIntervalEnd = start + step;
+            double currentIntervalStart = intervalStart;
+            double currentIntervalEnd = intervalStart + step;
 
-            while (currentIntervalStart <= end)
+            while (currentIntervalStart <= intervalEnd)
             {
                 double equationStart = Equation(currentIntervalStart);
                 double equationEnd = Equation(currentIntervalEnd);
 
                 if (equationStart * equationEnd <= 0)
                 {
-                    double root = SolveEquation(currentIntervalStart, currentIntervalEnd, tolerance);
+                    double root = FindRootInInterval(currentIntervalStart, currentIntervalEnd, tolerance, out int steps);
                     Console.WriteLine($"Интервал [{currentIntervalStart:F3}; {currentIntervalEnd:F3}]");
                     Console.WriteLine($"Решение: x = {root:F3}");
+                    Console.WriteLine($"Шаги: {steps}");
+
                 }
 
                 currentIntervalStart = currentIntervalEnd;
                 currentIntervalEnd += step;
             }
+
+            Console.ReadLine();
         }
 
         static double Equation(double x)
@@ -38,18 +41,29 @@ namespace ConsoleApp48
             return Math.Pow(x, 3) - 8 * x + 1 + 5 * Math.Sin(x) - 12 * Math.Cos(x);
         }
 
-        static double SolveEquation(double start, double end, double tolerance)
+        static double FindRootInInterval(double start, double end, double tolerance, out int steps)
         {
-            double delta = 2 * tolerance;
-            while (Equation(start) * Equation(start + delta) > 0) 
+            steps = 0;
+
+            while (end - start > tolerance)
             {
-                start += delta;
+                double mid = (start + end) / 2;
+
+                if (Equation(start) * Equation(mid) < 0)
+                {
+                    end = mid;
+                }
+                else
+                {
+                    start = mid;
+                }
+
+                //steps++;
             }
 
-            return start + tolerance;
-            
+            steps++;
+
+            return (start + end) / 2;
         }
     }
-
-
 }
